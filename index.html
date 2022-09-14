@@ -133,38 +133,38 @@
                     rate_per_day_7 = rate[car_id]['7']
                     if (days >= 7) {
                         car_rates.push({
-                            'rate_per_day': `${days}: ${rate_per_day_7}`,
-                            'total_rate_per_day': rate_per_day_7 * days,
+                            'rate_per_day': `S/. ${rate_per_day_7}`,
+                            'total_rate_per_day': `S/. ${rate_per_day_7 * days}`,
                             'days': days
                         })
                     } else if (days >= 3) {
                         days_7 = 7
                         car_rates.push({
-                            'rate_per_day': `${days}: ${rate_per_day_3456}`, 
-                            'total_rate_per_day': rate_per_day_3456 * days, 
+                            'rate_per_day': `S/. ${rate_per_day_3456}`, 
+                            'total_rate_per_day': `S/. ${rate_per_day_3456 * days}`, 
                             'days': days
                         })
                         car_rates.push({
-                            'rate_per_day': `${days_7}: ${rate_per_day_7}`,
-                            'total_rate_per_day': rate_per_day_7 * days_7,
+                            'rate_per_day': `S/. ${rate_per_day_7}`,
+                            'total_rate_per_day': `S/. ${rate_per_day_7 * days_7}`,
                             'days': days_7
                         })
                     } else {
                         days_7 = 7
                         days_3456 = 3
                         car_rates.push({
-                            'rate_per_day': `${days}: ${rate_per_day_base}`, 
-                            'total_rate_per_day': rate_per_day_base * days, 
+                            'rate_per_day': `S/. ${rate_per_day_base}`, 
+                            'total_rate_per_day': `S/. ${rate_per_day_base * days}`, 
                             'days': days
                         })
                         car_rates.push({
-                            'rate_per_day': `${days_3456}: ${rate_per_day_3456}`,
-                            'total_rate_per_day': rate_per_day_3456 * days_3456,
+                            'rate_per_day': `S/. ${rate_per_day_3456}`,
+                            'total_rate_per_day': `S/. ${rate_per_day_3456 * days_3456}`,
                             'days': days_3456
                         })
                         car_rates.push({
-                            'rate_per_day': `${days_7}: ${rate_per_day_7}`,
-                            'total_rate_per_day': rate_per_day_7 * days_7,
+                            'rate_per_day': `S/. ${rate_per_day_7}`,
+                            'total_rate_per_day': `S/. ${rate_per_day_7 * days_7}`,
                             'days': days_7
                         })
                     } 
