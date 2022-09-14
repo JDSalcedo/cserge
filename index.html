@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <title>Rent Car</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+        <!-- Styles -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+        <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.20.2/dist/bootstrap-table.min.css">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous"/>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+
+        <!-- Or for RTL support -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
+
+        <!-- Scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.0/dist/jquery.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script src="https://unpkg.com/bootstrap-table@1.20.2/dist/bootstrap-table.min.js"></script>
+        <script src="https://unpkg.com/bootstrap-table@1.20.2/dist/extensions/mobile/bootstrap-table-mobile.js"></script>
+
+        <!-- fontawesome -->
+        <script src="https://kit.fontawesome.com/e562cce8f6.js" crossorigin="anonymous"></script>
+
+        <script>
+            function operateFormatter(value, row, index) {
+                return `
+                    <a class="whatsApp text-success" href="javascript:void(0)" title="WhatsApp">
+                        Enviar a Whatsapp <i class="bi bi-whatsapp"></i>
+                    </a>
+                `
+            }
+            window.operateEvents = {
+                'click .whatsApp': function (e, value, row, index) {
+                    window.open(`https://wa.me/+51965065538?text=Buen día, favor de confirmar esta cotización: Auto: ${row['car']}, Días: ${row['days']}, Destino: ${row['destiny']}, Precio por Día: ${row['pricexday']}, Total: ${row['price_total']}`)
+                }
+            }
+            const features = {
+                '10':  {'type': 'Sedán', 'year': false, 'engine': 'Mecánico', 'fuel': 'Gasolina', 'color': 'Rojo', 'ac': false, 'blue': false, 'rev_camera': false, 'rows': 2, 'navigate': false},
+                '20':  {'type': 'Sedán', 'year': false, 'engine': 'Mecánico', 'fuel': 'GLP y Gasolina', 'color': 'Blanco', 'ac': false, 'blue': false, 'rev_camera': false, 'rows': 2, 'navigate': false},
+                '30':  {'type': 'SUV', 'year': false, 'engine': 'Automático', 'fuel': 'Gasolina', 'color': 'Negro', 'ac': false, 'blue': false, 'rev_camera': false, 'rows': 2, 'navigate': false},
+                '40':  {'type': 'SUV', 'year': false, 'engine': 'Mecánico', 'fuel': 'GLP y Gasolina', 'color': 'Plata', 'ac': false, 'blue': false, 'rev_camera': false, 'rows': 2, 'navigate': false},
+                '50':  {'type': 'PICK UP', 'year': false, 'engine': 'Mecánico', 'fuel': 'Petroleo', 'color': 'Azul', 'ac': false, 'blue': false, 'rev_camera': false, 'rows': 2, 'navigate': false}
+            }
+            const rate = {
+                '10':  {'base': 150, '3456': 145, '7': 135},
+                '20':  {'base': 155, '3456': 150, '7': 140},
+                '30':  {'base': 180, '3456': 175, '7': 165},
+                '40':  {'base': 190, '3456': 185, '7': 175},
+                '50':  {'base': 250, '3456': 245, '7': 230}
+            }
+            const destiny_km = {
+                '20':  {'km': 110},
+                '30':  {'km': 80},
+                '40':  {'km': 240},
+                '50':  {'km': 380},
+                '60':  {'km': 420},
+                '70':  {'km': 520},
+                '80':  {'km': 590},
+                '90':  {'km': 440},
+                '100': {'km': 870},
+                '110': {'km': 140},
+                '120': {'km': 116},
+            }
+
+            $(document).ready(function() {
+                var self = this
+                $('#car_id').select2({
+                    theme: 'bootstrap-5',
+                    placeholder: 'Selecciona un auto...',
+                    width: '100%',
+                })
+                $('#origin_id').select2({
+                    theme: 'bootstrap-5',
+                    width: '100%',
+                })
+                $('#origin_id').prop("disabled", true)
+                $('#destiny_id').select2({
+                    theme: 'bootstrap-5',
+                    placeholder: 'Selecciona un destino...',
+                    width: '100%',
+                })
+                var $rtable = $('#rtable')
+                $rtable.bootstrapTable({
+                    locale: 'es',
+                    formatSearch: function () {
+                        return 'Buscar...';
+                    },
+                    formatNoMatches: function () {
+                        return 'No se encontró ninguna coincidencia.'
+                    }
+                })
+                $rtable.bootstrapTable('hideColumn', 'origin')
+
+                $('#car_id').on('change', (event) => {
+                    event.preventDefault()
+
+                    var $car_id = $(event.currentTarget)
+                    var $optionSelected = $car_id.children('option:selected')
+                    var car_id = $optionSelected.val()
+
+                    $features_id = $('#features_id')
+                    $features_id.empty()
+                    feature = features[car_id]
+                    $features_id.append(`
+                        <li class="list-group-item justify-content-between align-items-center"><div><i class="fa-solid fa-car"></i></div><small>${feature['type']}</small></li>
+                        ${feature['year'] ? "<li class='list-group-item align-items-center'><div><i class='fa-solid fa-calendar-check'></i></div><small>"+ feature['year']+"</small></li>" : ''}
+                        <li class="list-group-item align-items-center"><div><i class="fa-solid fa-gear"></i></div><small>${feature['engine']}</small></li>
+                        <li class="list-group-item align-items-center"><div><i class="fa-solid fa-gas-pump"></i></div><small>${feature['fuel']}</small></li>
+                        <li class="list-group-item align-items-center"><div><i class="fa-solid fa-brush"></i></div><small>${feature['color']}</small></li>
+                        ${feature['ac'] ? '<li class="list-group-item align-items-center"><div><i class="fas fa-fan"></i></div><small>AC</li></small>' : ''}
+                        ${feature['blue'] ? '<li class="list-group-item align-items-center"><div><i class="fa fa-bluetooth" aria-hidden="true"></i></div><small>BT</li></small>' : ''}
+                        ${feature['rev_camera'] ? '<li class="list-group-item align-items-center"><div><i class="fas fa-camera"></i></div> Cámara Retroceso</li></small>' : ''}
+                        <li class="list-group-item align-items-center"><div><i class="fas fa-couch"></i></div><small>Filas Asientos: ${feature['rows']}</small></li>
+                        ${feature['navigate'] ? '<li class="list-group-item align-items-center"><div><i class="fas fa-map"></i></div><small>Navegación a bordo</li></small>' : ''}
+                    `)
+                })
+
+                function total_rate_per_day(car_id, origin_id, destiny_id, days) {
+                    var rate_per_day = 0.0
+                    var additional = 0.0
+                    // Si la cantidad de km totales es mayor a la cantidad disponible.
+                    var car_rates = []
+                    
+                    rate_per_day_base = rate[car_id]['base']
+                    rate_per_day_3456 = rate[car_id]['3456']
+                    rate_per_day_7 = rate[car_id]['7']
+                    if (days >= 7) {
+                        car_rates.push({
+                            'rate_per_day': `${days}: ${rate_per_day_7}`,
+                            'total_rate_per_day': rate_per_day_7 * days,
+                            'days': days
+                        })
+                    } else if (days >= 3) {
+                        days_7 = 7
+                        car_rates.push({
+                            'rate_per_day': `${days}: ${rate_per_day_3456}`, 
+                            'total_rate_per_day': rate_per_day_3456 * days, 
+                            'days': days
+                        })
+                        car_rates.push({
+                            'rate_per_day': `${days_7}: ${rate_per_day_7}`,
+                            'total_rate_per_day': rate_per_day_7 * days_7,
+                            'days': days_7
+                        })
+                    } else {
+                        days_7 = 7
+                        days_3456 = 3
+                        car_rates.push({
+                            'rate_per_day': `${days}: ${rate_per_day_base}`, 
+                            'total_rate_per_day': rate_per_day_base * days, 
+                            'days': days
+                        })
+                        car_rates.push({
+                            'rate_per_day': `${days_3456}: ${rate_per_day_3456}`,
+                            'total_rate_per_day': rate_per_day_3456 * days_3456,
+                            'days': days_3456
+                        })
+                        car_rates.push({
+                            'rate_per_day': `${days_7}: ${rate_per_day_7}`,
+                            'total_rate_per_day': rate_per_day_7 * days_7,
+                            'days': days_7
+                        })
+                    } 
+                    return car_rates
+                }
+
+                $('#bttn_calculate').on('click', (event) => {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    const forms = document.querySelectorAll('.needs-validation')
+                    // Loop over them and prevent submission
+                    Array.from(forms).forEach(form => {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                            $('#results').hide();
+                        } else{
+                            var car_id = $('#car_id').val()
+                            var days = $('#days').val()
+                            var origin_id = $('#origin_id').val()
+                            var destiny_id = $('#destiny_id').val()
+
+                            var car_selected_text = $('#car_id option:selected').text()
+                            var origin_selected_text = $('#origin_id option:selected').text()
+                            var destiny_selected_text = $('#destiny_id option:selected').text()
+                            
+                            var car_rates = total_rate_per_day(car_id, origin_id, destiny_id, days)
+
+                            // Eliminar datos de la tabla antes de guardar
+                            $rtable.bootstrapTable('removeAll')
+
+                            var rows = []
+                            for (let car_rate of car_rates) {
+                                rows.push({
+                                    car: car_selected_text,
+                                    origin: origin_selected_text,
+                                    destiny: destiny_selected_text,
+                                    days: car_rate['days'],
+                                    pricexday: car_rate['rate_per_day'],
+                                    km: origin_id != destiny_id ? `${destiny_km[destiny_id]['km']} km` : '0 km',
+                                    price_total: car_rate['total_rate_per_day'],
+                                    operate: ''
+                                })
+                            }
+
+                            $rtable.bootstrapTable('append', rows)
+                            $('#results').show();
+                        }
+                        form.classList.add('was-validated')
+                    })
+                })
+            })
+        </script>
+    </head>
+    <body>
+        <div class="jumbotron text-center">
+            <h1>CSERGE PERU RENT A CAR</h1>
+            <p>Alquiler de autos y camionetas full equipo Mecánicos y Automáticos</p>
+        </div>
+        <div class="container">
+            <form class="needs-validation">
+                <div class="row">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        <label for="car_id" class="form-label">Auto</label>
+                        <select name="car_id" id="car_id" class="form-control" required>
+                            <option></option>
+                            <option value="10">HYUNDAI ELANTRA</option>
+                            <option value="20">TOYOTA COROLLA</option>
+                            <option value="30">HONDA HRV</option>
+                            <option value="40">TOYOTA RAV4</option>
+                            <option value="50">TOYOTA HILUX</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row" style="margin-top: 0.5rem;">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-8 d-flex justify-content-center">
+                        <ul class="list-group list-group-horizontal" id="features_id" style="overflow-y: auto;"></ul>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-3">
+                        <label for="destiny_id" class="form-label">Origen</label>
+                        <select name="origin_id" id="origin_id" class="form-control">
+                            <option value="10">Piura</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="destiny_id" class="form-label">Destino</label>
+                        <select name="destiny_id" id="destiny_id" class="form-control" required>
+                            <option></option>
+                            <option value="10">Piura</option>
+                            <option value="20">Paita</option>
+                            <option value="30">Sullana</option>
+                            <option value="40">Talara</option>
+                            <option value="50">Mancora</option>
+                            <option value="60">Punta Sal</option>
+                            <option value="70">Zorritos</option>
+                            <option value="80">Tumbes</option>
+                            <option value="90">Chiclayo</option>
+                            <option value="100">Trujillo</option>
+                            <option value="110">Chulucanas</option>
+                            <option value="120">Tambogrande</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="days" class="form-label">Días</label>
+                        <input type="number" class="form-control" id="days" min="1" required>
+                    </div>
+                </div>
+                <div class="row" style="margin-top: 0.5rem;">
+                    <div class="d-flex justify-content-center">
+                        <button type="button" id="bttn_calculate" class="btn btn-success">Calcular Tarifa</button>
+                    </div>
+                </div>
+                <div class="row" id="results" style="display: none; margin-top: 0.5rem;">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10">
+                        <h2>Resultados</h2>
+                        <div class="table-responsive">
+                            <table class="table"
+                                id="rtable"
+                                data-show-columns="true"
+                                data-search="true"
+                                data-mobile-responsive="true"
+                                data-check-on-init="true"
+                                >
+                                <caption>*Tarifas referenciales, a confirmar por un asesor comercial.<br/>*Garantia, a confirmar por un asesor comercial.</caption>
+                                <thead>
+                                    <tr>
+                                        <th data-field="car">Auto</th>
+                                        <th data-field="origin">Origen</th>
+                                        <th data-field="destiny">Destino</th>
+                                        <th data-field="days" data-sortable="true" data-align="center">Días</th>
+                                        <th data-field="pricexday" data-sortable="true">Precio por día</th>
+                                        <th data-field="km" data-sortable="true">Distancia</th>
+                                        <th data-field="price_total" data-sortable="true" data-halign="right" data-align="right">Tarifa total</th>
+                                        <th data-field="operate" data-formatter="operateFormatter" data-events="operateEvents" data-halign="center" data-align="center">Whatsapp</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </body>
+</html>
